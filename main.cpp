@@ -1,11 +1,12 @@
 #include<iostream>
 #include<random>
-int pick_random_symbol(int reel[], int size, std::mt19937& gen) {
-    std::uniform_int_distribution<> dist(0, size - 1);
+#include<vector>
+int pick_random_symbol(const std::vector<int>& reel, std::mt19937& gen) {
+    std::uniform_int_distribution<> dist(0, reel.size()-1);
     int index = dist(gen);
     return reel[index];
 }
-int payout_table[6][3] ={
+const std::vector<std::vector<int>> payout_table={
     {0,0,10},
     {0,0,10},
     {0,7,14},
@@ -13,37 +14,41 @@ int payout_table[6][3] ={
     {0,9,18},
     {0,10,20}
 };
-int length_of_win_line(int symbol1, int symbol2, int symbol3){
-    if(symbol1==symbol2&&symbol2!=symbol3){
-        return 1;
+const std::vector<std::vector<int>> reels ={
+    {1,1,1,2,2,3,3,4,5,6},
+    {1,1,1,2,2,3,3,4,5,6},
+    {1,1,1,2,2,3,3,4,5,6}
+};
+int length_of_win_line(const std::vector<int>& spin_result){
+    int length=1;
+    for (int i=1;i<spin_result.size();i++){
+        if(spin_result[i]==spin_result[0]){
+            length++;
+        }
+        else{
+            break;
+        }
     }
-    else if(symbol1==symbol2&&symbol1==symbol3){
-        return 2;
-    }
-    return 0;
+    return length;
 }
-int get_payout(int symbol1, int symbol2, int symbol3){
-    return payout_table[symbol1-1][length_of_win_line(symbol1,symbol2,symbol3)];
+int get_payout(const std::vector<int>& spin_result){
+    return payout_table[spin_result[0]-1][length_of_win_line(spin_result)-1];
 }
 int main(){
     std::random_device rd;
     std::mt19937 gen(rd());
-    int reel1[10]={1,1,1,2,2,3,3,4,5,6};
-    int reel2[10]={1,1,1,2,2,3,3,4,5,6};
-    int reel3[10]={1,1,1,2,2,3,3,4,5,6};
-    int length1=sizeof(reel1)/sizeof(reel1[0]);
-    int length2=sizeof(reel2)/sizeof(reel2[0]);
-    int length3=sizeof(reel3)/sizeof(reel3[0]);
     int matches = 0;
     double payout = 0;
     int total_number_of_bets;
     std::cout<<"Enter a number of bets: ";
     std::cin>>total_number_of_bets;
     for(int i=0;i<total_number_of_bets;i++){
-        int reel_1_symbol=pick_random_symbol(reel1,length1,gen);
-        int reel_2_symbol=pick_random_symbol(reel2,length2,gen);
-        int reel_3_symbol=pick_random_symbol(reel3,length3,gen);
-        int spin_payout = get_payout(reel_1_symbol,reel_2_symbol,reel_3_symbol);
+        std::vector<int> spin_result;
+        for(int j=0;j<reels.size();j++){
+            int symbol=pick_random_symbol(reels[j],gen);
+            spin_result.push_back(symbol);
+        }
+        int spin_payout = get_payout(spin_result);
         payout+=spin_payout;
         if(spin_payout!=0){
             matches++;
