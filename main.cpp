@@ -2,7 +2,8 @@
 #include<random>
 #include<vector>
 const int ROWS = 3;
-const int COLUMNS =3;
+const int COLUMNS = 3;
+const int WILD = 0;
 const std::vector<std::vector<int>> paylines = {
     {0,0,0},
     {1,1,1},
@@ -11,27 +12,40 @@ const std::vector<std::vector<int>> paylines = {
     {2,1,0}
 };
 const std::vector<std::vector<int>> payout_table={
-    {0,0,10},
-    {0,0,10},
-    {0,7,14},
-    {0,7,14},
-    {0,9,18},
-    {0,10,20}
+    {0,0,10}, //WILD
+    {0,0,1}, //1
+    {0,0,1}, //2
+    {0,0,3}, //3
+    {0,0,3}, //4
+    {0,2,5}, //5
+    {0,2,5} //6
 };
 const std::vector<std::vector<int>> reels ={
-    {1,1,1,2,2,3,3,4,5,6},
-    {1,1,1,2,2,3,3,4,5,6},
-    {1,1,1,2,2,3,3,4,5,6}
+    {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
+    {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
+    {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
 };
 int pick_random_stop(const std::vector<int>& reel, std::mt19937& gen) {
     std::uniform_int_distribution<> dist(0, reel.size()-1);
     int stop = dist(gen);
     return stop;
 }
-int length_of_win_line(const std::vector<int>& spin_result){
-    int length=1;
-    for (int i=1;i<spin_result.size();i++){
-        if(spin_result[i]==spin_result[0]){
+int get_base_symbol(const std::vector<int>& payline){ //returns the first non-wild symbol in a payline
+    for (int i=0;i<payline.size();i++){
+        if(payline[i]!=WILD){
+            return payline[i];
+        }
+    }
+    return WILD;
+}
+int length_of_win_line(const std::vector<int>& spin_result){ 
+    int base = get_base_symbol(spin_result);
+    if(base == WILD){
+        return spin_result.size();
+    }
+    int length=0;
+    for (int i=0;i<spin_result.size();i++){
+        if(spin_result[i]==base || spin_result[i]==WILD){
             length++;
         }
         else{
@@ -64,7 +78,8 @@ std::vector<int> get_payline(const std::vector<std::vector<int>>& screen,const s
     return payline;
 }
 int get_payout(const std::vector<int>& spin_result){
-    return payout_table[spin_result[0]-1][length_of_win_line(spin_result)-1];
+    int base = get_base_symbol(spin_result);
+    return payout_table[base][length_of_win_line(spin_result)-1];
 }
 int get_total_payout_for_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines){
     int total_payout = 0;
@@ -75,6 +90,7 @@ int get_total_payout_for_screen(const std::vector<std::vector<int>>& screen, con
     }
     return total_payout;
 }
+
 struct SimulationStats {
     int total_number_of_bets=0;
     int matches=0;
