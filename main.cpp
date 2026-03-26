@@ -34,30 +34,46 @@ int length_of_win_line(const std::vector<int>& spin_result){
 int get_payout(const std::vector<int>& spin_result){
     return payout_table[spin_result[0]-1][length_of_win_line(spin_result)-1];
 }
-int main(){
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    int matches = 0;
-    double payout = 0;
-    int total_number_of_bets;
-    std::cout<<"Enter a number of bets: ";
-    std::cin>>total_number_of_bets;
-    for(int i=0;i<total_number_of_bets;i++){
-        std::vector<int> spin_result;
-        for(int j=0;j<reels.size();j++){
+std::vector<int> spin(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
+    std::vector<int> spin_result;
+    for(int j=0;j<reels.size();j++){
             int symbol=pick_random_symbol(reels[j],gen);
             spin_result.push_back(symbol);
         }
-        int spin_payout = get_payout(spin_result);
-        payout+=spin_payout;
-        if(spin_payout!=0){
-            matches++;
-        }
+    return spin_result;
+}
+struct SimulationStats {
+    int total_number_of_bets=0;
+    int matches=0;
+    double total_payout=0;
+    double hit_rate=0;
+    double RTP=0;
+};
+void process_spin(const std::vector<int>& spin_result, SimulationStats& stats){
+    int spin_payout=get_payout(spin_result);
+    stats.total_payout+=spin_payout;
+    if(spin_payout!=0){
+        stats.matches++;
     }
-    double hit_rate;
-    hit_rate=total_number_of_bets/matches;
-    double RTP;
-    RTP=payout/total_number_of_bets;
-    std::cout<<"\nTotal bets performed: "<<total_number_of_bets<<"\nHit rate: 1/"<<hit_rate<<"\nRTP: "<<RTP;
+    stats.total_number_of_bets++;
+}
+SimulationStats run_simulation(const std::vector<std::vector<int>>& reels, int number_of_spins,std::mt19937& gen){
+    SimulationStats stats;
+    for(int i=0;i<number_of_spins;i++){
+        std::vector<int> spin_result = spin(reels,gen);
+        process_spin(spin_result,stats);
+    }
+    stats.hit_rate=static_cast<double>(stats.matches)/stats.total_number_of_bets;
+    stats.RTP=stats.total_payout/stats.total_number_of_bets;
+    return stats;
+}
+int main(){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::cout<<"Enter a number of bets: ";
+    int number_of_spins;
+    std::cin>>number_of_spins;
+    SimulationStats stats = run_simulation(reels,number_of_spins,gen);
+    std::cout<<"\nTotal bets performed: "<<stats.total_number_of_bets<<"\nHit rate: "<<stats.hit_rate<<"\nRTP: "<<stats.RTP;
     return 0;
 }
