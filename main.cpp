@@ -81,14 +81,57 @@ int get_payout(const std::vector<int>& spin_result){
     int base = get_base_symbol(spin_result);
     return payout_table[base][length_of_win_line(spin_result)-1];
 }
-int get_total_payout_for_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines){
+struct LineResult {
+    std::vector<int> symbols;
+    int base_symbol = 0;
+    int win_length = 0;
+    int payout = 0;
+};
+LineResult evaluate_line(const std::vector<std::vector<int>>& screen, const std::vector<int>& line_definition){
+    LineResult result;
+    result.symbols = get_payline(screen,line_definition);
+    result.base_symbol = get_base_symbol(result.symbols);
+    result.win_length = length_of_win_line(result.symbols);
+    result.payout = get_payout(result.symbols);
+    return result;
+}
+struct ScreenEvaluation {
     int total_payout = 0;
-    for(int i=0;i<paylines.size();i++){
-        std::vector<int> payline = get_payline(screen,paylines[i]);
-        int line_payout = get_payout(payline);
-        total_payout += line_payout;
+    int winning_lines = 0;
+    std::vector<LineResult> line_results;
+};
+ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines){
+    ScreenEvaluation result;
+    for(int i = 0; i < paylines.size(); i++){
+        LineResult line_result = evaluate_line(screen,paylines[i]);
+        result.line_results.push_back(line_result);
+        result.total_payout += line_result.payout;
+        if(line_result.payout!=0){
+            result.winning_lines++;
+        }
     }
-    return total_payout;
+    return result;
+}
+void print_screen(const std::vector<std::vector<int>>& screen){
+    for(int i = 0; i<screen.size();i++){
+        for(int j = 0; j<screen[0].size(); j++){
+            std::cout<<screen[j][i]<<" ";
+        }
+        std::cout<<"\n";
+    }
+}
+void print_line_result(const LineResult& result){
+    std::cout << "Line: ";
+    for(int symbol : result.symbols){
+        std::cout<<symbol<<" ";
+    }
+    std::cout<<"| base: "<<result.base_symbol<<"| length: "<<result.win_length<<"| payout: "<<result.payout<<"\n";
+}
+void print_screen_evaluation(const ScreenEvaluation& result){
+    std::cout<<"Total payout: "<<result.total_payout<<"| winning lines: "<<result.winning_lines<<"\n";
+    for(int i = 0; i<result.line_results.size();i++){
+        print_line_result(result.line_results[i]);
+    }
 }
 
 struct SimulationStats {
@@ -99,9 +142,9 @@ struct SimulationStats {
     double RTP=0;
 };
 void process_spin(const std::vector<std::vector<int>>& spin_screen, SimulationStats& stats){
-    int spin_payout=get_total_payout_for_screen(spin_screen,paylines);
-    stats.total_payout+=spin_payout;
-    if(spin_payout!=0){
+    ScreenEvaluation screen_stats=evaluate_screen(spin_screen,paylines);
+    stats.total_payout+=screen_stats.total_payout;
+    if(screen_stats.total_payout!=0){
         stats.matches++;
     }
     stats.total_number_of_bets++;
@@ -117,13 +160,39 @@ SimulationStats run_simulation(const std::vector<std::vector<int>>& reels, int n
     
     return stats;
 }
+void bet(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
+    std::vector<std::vector<int>> screen = spin_screen(reels,gen);
+    print_screen(screen);
+    ScreenEvaluation result = evaluate_screen(screen,paylines);
+    print_screen_evaluation(result);
+    char play_again;
+    std::cout<<"Do you want to play again? (y/n)\n";
+    std::cin>>play_again;
+    if(play_again == 'y'){
+        bet(reels,gen);
+    }else if(play_again == 'n'){
+        std::cout<<"Okay, bye!\n";
+    }else{
+        std::cout<<"Invalid input, boss, perform another spin to clear your head, and try again. :)\n";
+        bet(reels,gen);
+    }
+}
 int main(){
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::cout<<"Enter a number of bets: ";
-    int number_of_spins;
-    std::cin>>number_of_spins;
-    SimulationStats stats = run_simulation(reels,number_of_spins,gen);
-    std::cout<<"\nTotal bets performed: "<<stats.total_number_of_bets<<"\nHit rate: "<<stats.hit_rate<<"\nRTP: "<<stats.RTP;
+    int choice;
+    std::cout<<"Do you want to play, or do you want to perform a simulation?\n"<<"0: play\n"<<"1: simulation\n";
+    std::cin >>choice;
+    if(choice == 0){
+        bet(reels,gen);
+    }else if(choice == 1){
+        std::cout<<"Enter a number of bets: ";
+        int number_of_spins;
+        std::cin>>number_of_spins;
+        SimulationStats stats = run_simulation(reels,number_of_spins,gen);
+        std::cout<<"\nTotal bets performed: "<<stats.total_number_of_bets<<"\nHit rate: "<<stats.hit_rate<<"\nRTP: "<<stats.RTP;
+    }else{
+        std::cout<<"Invalid input";
+    }
     return 0;
 }
