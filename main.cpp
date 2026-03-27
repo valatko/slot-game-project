@@ -2,25 +2,27 @@
 #include<random>
 #include<vector>
 const int ROWS = 3;
-const int COLUMNS = 3;
+const int COLUMNS = 5;
 const int WILD = 0;
 const std::vector<std::vector<int>> paylines = {
-    {0,0,0},
-    {1,1,1},
-    {2,2,2},
-    {0,1,2},
-    {2,1,0}
+    {0,0,0,0,0},
+    {1,1,1,1,1},
+    {2,2,2,2,2},
+    {0,1,2,1,0},
+    {2,1,0,1,2}
 };
 const std::vector<std::vector<int>> payout_table={
-    {0,0,10}, //WILD
-    {0,0,1}, //1
-    {0,0,1}, //2
-    {0,0,3}, //3
-    {0,0,3}, //4
-    {0,2,5}, //5
-    {0,2,5} //6
+    {0,0,0,0,100}, //WILD
+    {0,0,1,2,5}, //1
+    {0,0,1,2,5}, //2
+    {0,0,2,4,10}, //3
+    {0,0,2,4,10}, //4
+    {0,1,3,6,15}, //5
+    {0,1,3,6,15} //6
 };
 const std::vector<std::vector<int>> reels ={
+    {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
+    {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
     {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
     {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
     {WILD,1,1,1,1,2,2,2,2,3,3,3,4,4,5,6},
@@ -113,8 +115,8 @@ ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, co
     return result;
 }
 void print_screen(const std::vector<std::vector<int>>& screen){
-    for(int i = 0; i<screen.size();i++){
-        for(int j = 0; j<screen[0].size(); j++){
+    for(int i = 0; i<screen[0].size();i++){
+        for(int j = 0; j<screen.size(); j++){
             std::cout<<screen[j][i]<<" ";
         }
         std::cout<<"\n";
