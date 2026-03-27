@@ -160,7 +160,7 @@ SimulationStats run_simulation(const std::vector<std::vector<int>>& reels, int n
     
     return stats;
 }
-void bet(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
+void play_game(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
     std::vector<std::vector<int>> screen = spin_screen(reels,gen);
     print_screen(screen);
     ScreenEvaluation result = evaluate_screen(screen,paylines);
@@ -169,13 +169,20 @@ void bet(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
     std::cout<<"Do you want to play again? (y/n)\n";
     std::cin>>play_again;
     if(play_again == 'y'){
-        bet(reels,gen);
+        play_game(reels,gen);
     }else if(play_again == 'n'){
         std::cout<<"Okay, bye!\n";
     }else{
         std::cout<<"Invalid input, boss, perform another spin to clear your head, and try again. :)\n";
-        bet(reels,gen);
+        play_game(reels,gen);
     }
+}
+void perform_simulation(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
+    std::cout<<"Enter a number of bets: ";
+    int number_of_spins;
+    std::cin>>number_of_spins;
+    SimulationStats stats = run_simulation(reels,number_of_spins,gen);
+    std::cout<<"\nTotal bets performed: "<<stats.total_number_of_bets<<"\nHit rate: "<<stats.hit_rate<<"\nRTP: "<<stats.RTP;
 }
 int main(){
     std::random_device rd;
@@ -184,13 +191,9 @@ int main(){
     std::cout<<"Do you want to play, or do you want to perform a simulation?\n"<<"0: play\n"<<"1: simulation\n";
     std::cin >>choice;
     if(choice == 0){
-        bet(reels,gen);
+        play_game(reels,gen);
     }else if(choice == 1){
-        std::cout<<"Enter a number of bets: ";
-        int number_of_spins;
-        std::cin>>number_of_spins;
-        SimulationStats stats = run_simulation(reels,number_of_spins,gen);
-        std::cout<<"\nTotal bets performed: "<<stats.total_number_of_bets<<"\nHit rate: "<<stats.hit_rate<<"\nRTP: "<<stats.RTP;
+        perform_simulation(reels,gen);
     }else{
         std::cout<<"Invalid input";
     }
