@@ -15,7 +15,13 @@ struct ScreenEvaluation {
     int scatter_count = 0;
     int scatter_payout = 0;
     bool free_spins_triggered = false;
+    int awarded_free_spins = 0;
+    double free_spins_payout = 0;
     std::vector<LineResult> line_results;
+};
+struct BonusResult {
+    int spins_played = 0;
+    double total_payout = 0;
 };
 
 int pick_random_stop(const std::vector<int>& reel, std::mt19937& gen);
@@ -29,4 +35,6 @@ int get_line_payout(const std::vector<int>& spin_result);
 int get_scatter_payout(const std::vector<std::vector<int>>& screen, const std::vector<int>& scatter_payout);
 bool feature_trigger(const std::vector<std::vector<int>>& screen);
 LineResult evaluate_line(const std::vector<std::vector<int>>& screen, const std::vector<int>& line_definition);
+int get_awarded_free_spins(const std::vector<std::vector<int>>& screen);
+BonusResult run_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins, std::mt19937& gen);
 ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines, const std::vector<int>& scatter_payout);

@@ -30,12 +30,29 @@ void print_screen_evaluation(const ScreenEvaluation& result){
         std::cout<<"no\n";
     }
 }
+void play_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins,std::mt19937& gen){
+    int total_payout = 0;
+    for(int i = 0; i<number_of_spins; i++){
+        std::cout<<"Spin "<<i+1<<"\n";
+        std::vector<std::vector<int>> screen = spin_screen(reels,gen);
+        ScreenEvaluation result = evaluate_screen(screen,paylines,scatter_payout_table);
+        std::cout<<"Total payout: "<<result.total_payout<<"| winning lines: "<<result.winning_lines<<"| scatter count: "<<result.scatter_count<<"| scatter payout: "<<result.scatter_payout<<"\n";
+        for(int j = 0; j<result.line_results.size();j++){
+            print_line_result(result.line_results[j]);
+        }
+        total_payout+=result.total_payout;
+    }
+    std::cout<<"Total Free Spins payout: "<<total_payout<<"\n";
+}
 
 void play_game(const std::vector<std::vector<int>>& reels, std::mt19937& gen){
     std::vector<std::vector<int>> screen = spin_screen(reels,gen);
     print_screen(screen);
     ScreenEvaluation result = evaluate_screen(screen,paylines,scatter_payout_table);
     print_screen_evaluation(result);
+    if(result.free_spins_triggered){
+        play_free_spins(reels,BONUS_SPINS,gen);
+    }
     char play_again;
     std::cout<<"Do you want to play again? (y/n)\n";
     std::cin>>play_again;

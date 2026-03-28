@@ -4,6 +4,7 @@ const int ROWS = 3;
 const int COLUMNS = 5;
 const int WILD = 0;
 const int SCATTER = 7;
+const int BONUS_SPINS = 10;
 const std::vector<std::vector<int>> paylines = {
     {0,0,0,0,0},
     {1,1,1,1,1},

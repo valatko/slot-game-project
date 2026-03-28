@@ -103,6 +103,27 @@ LineResult evaluate_line(const std::vector<std::vector<int>>& screen, const std:
     result.payout = get_line_payout(result.symbols);
     return result;
 }
+int get_awarded_free_spins(const std::vector<std::vector<int>>& screen){
+    int scatter_count = count_symbol_on_screen(screen,SCATTER);
+    if (scatter_count>=3){
+        return BONUS_SPINS;
+    }
+    else{
+        return 0;
+    }
+}
+BonusResult run_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins, std::mt19937& gen){
+    BonusResult result;
+    int spins_played = 0;
+    for(int i = 0; i<number_of_spins; i++){
+        std::vector<std::vector<int>> screen = spin_screen(reels,gen);
+        ScreenEvaluation free_spin_eval = evaluate_screen(screen,paylines,scatter_payout_table);
+        result.total_payout += free_spin_eval.total_payout;
+        spins_played++;
+    }
+    result.spins_played = spins_played;
+    return result;
+}
 ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines, const std::vector<int>& scatter_payout){
     ScreenEvaluation result;
     for(int i = 0; i < paylines.size(); i++){
@@ -116,6 +137,7 @@ ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, co
     result.scatter_count = count_symbol_on_screen(screen,SCATTER);
     result.scatter_payout = get_scatter_payout(screen,scatter_payout);
     result.free_spins_triggered = feature_trigger(screen);
+    result.awarded_free_spins = get_awarded_free_spins(screen);
     result.total_payout+=result.scatter_payout;
     return result;
 }
