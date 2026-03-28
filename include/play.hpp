@@ -1,7 +1,7 @@
 #pragma once
 #include <random>
 #include <vector>
-#include "engine.h"
+#include "engine.hpp"
 
 void print_screen(const std::vector<std::vector<int>>& screen);
 void print_line_result(const LineResult& result);

@@ -1,9 +1,9 @@
 #include<iostream>
 #include<random>
 #include<vector>
-#include "config.h"
-#include "simulation.h"
-#include "play.h"
+#include "config.hpp"
+#include "simulation.hpp"
+#include "play.hpp"
 
 int main(){
     std::random_device rd;

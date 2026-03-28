@@ -1,6 +1,6 @@
-#include "play.h"
-#include "config.h"
-#include "engine.h"
+#include "play.hpp"
+#include "config.hpp"
+#include "engine.hpp"
 #include<iostream>
 
 void print_screen(const std::vector<std::vector<int>>& screen){

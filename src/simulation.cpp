@@ -1,6 +1,6 @@
-#include "simulation.h"
-#include "engine.h"
-#include "config.h"
+#include "simulation.hpp"
+#include "engine.hpp"
+#include "config.hpp"
 #include <iostream>
 
 
