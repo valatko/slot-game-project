@@ -34,6 +34,7 @@ std::vector<int> get_payline(const std::vector<std::vector<int>>& screen, const 
 int get_line_payout(const std::vector<int>& spin_result);
 int get_scatter_payout(const std::vector<std::vector<int>>& screen, const std::vector<int>& scatter_payout);
 bool feature_trigger(const std::vector<std::vector<int>>& screen);
+int pick_random_multiplier(const std::vector<int>& possible_multipliers,const std::vector<double>& probabilities);
 LineResult evaluate_line(const std::vector<std::vector<int>>& screen, const std::vector<int>& line_definition);
 int get_awarded_free_spins(const std::vector<std::vector<int>>& screen);
 BonusResult run_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins, std::mt19937& gen);

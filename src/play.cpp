@@ -32,15 +32,29 @@ void print_screen_evaluation(const ScreenEvaluation& result){
 }
 void play_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins,std::mt19937& gen){
     int total_payout = 0;
-    for(int i = 0; i<number_of_spins; i++){
-        std::cout<<"Spin "<<i+1<<"\n";
-        std::vector<std::vector<int>> screen = spin_screen(reels,gen);
-        ScreenEvaluation result = evaluate_screen(screen,paylines,scatter_payout_table);
-        std::cout<<"Total payout: "<<result.total_payout<<"| winning lines: "<<result.winning_lines<<"| scatter count: "<<result.scatter_count<<"| scatter payout: "<<result.scatter_payout<<"\n";
-        for(int j = 0; j<result.line_results.size();j++){
-            print_line_result(result.line_results[j]);
+    int remaining_spins = 3;
+    int current_spin = 1;
+    while(remaining_spins>0){
+        std::cout<<"Spin "<<current_spin<<"/"<<remaining_spins<<"\n";
+        current_spin++;
+        std::vector<std::vector<int>> screen = spin_screen(bonus_reels,gen);
+        print_screen(screen);
+        int cash_count = count_symbol_on_screen(screen,CASH);
+        if(cash_count>0){
+            std::cout<<"Cash tile values: ";
+            remaining_spins = 3;
+            int spin_payout = 0;
+            for(int i = 0;i<cash_count;i++){
+                int value = pick_random_multiplier(cash_multipliers,cash_multipliers_probabilities);
+                spin_payout+=value;
+                std::cout<<value<<", ";
+            }
+            std::cout<<"\nSpin payout: "<<spin_payout<<"\n";
+            total_payout += spin_payout;
         }
-        total_payout+=result.total_payout;
+        else{
+            remaining_spins--;
+        }
     }
     std::cout<<"Total Free Spins payout: "<<total_payout<<"\n";
 }

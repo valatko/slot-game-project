@@ -95,6 +95,11 @@ bool feature_trigger(const std::vector<std::vector<int>>& screen){
     }
     return false;
 }
+int pick_random_multiplier(const std::vector<int>& possible_multipliers,const std::vector<double>& probabilities){
+    static std::mt19937 gen(std::random_device{}());
+    std::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
+    return possible_multipliers[dist(gen)];
+}
 LineResult evaluate_line(const std::vector<std::vector<int>>& screen, const std::vector<int>& line_definition){
     LineResult result;
     result.symbols = get_payline(screen,line_definition);
@@ -114,14 +119,21 @@ int get_awarded_free_spins(const std::vector<std::vector<int>>& screen){
 }
 BonusResult run_free_spins(const std::vector<std::vector<int>>& reels, int number_of_spins, std::mt19937& gen){
     BonusResult result;
-    int spins_played = 0;
-    for(int i = 0; i<number_of_spins; i++){
-        std::vector<std::vector<int>> screen = spin_screen(reels,gen);
-        ScreenEvaluation free_spin_eval = evaluate_screen(screen,paylines,scatter_payout_table);
-        result.total_payout += free_spin_eval.total_payout;
-        spins_played++;
+    int remaining_spins = 3;
+    while (remaining_spins > 0){
+        std::vector<std::vector<int>> screen = spin_screen(bonus_reels,gen);
+        int cash_count = count_symbol_on_screen(screen,CASH);
+        result.spins_played++;
+        if (cash_count > 0) {
+            remaining_spins = 3;
+            for(int i = 0; i <cash_count; i++){
+                result.total_payout += pick_random_multiplier(cash_multipliers,cash_multipliers_probabilities);
+            }
+        }
+        else{
+            remaining_spins--;
+        }
     }
-    result.spins_played = spins_played;
     return result;
 }
 ScreenEvaluation evaluate_screen(const std::vector<std::vector<int>>& screen, const std::vector<std::vector<int>>& paylines, const std::vector<int>& scatter_payout){
